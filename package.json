@@ -16,12 +16,9 @@
     "url": "https://github.com/MoonlyDays/ChessGPT/issues"
   },
   "homepage": "https://github.com/MoonlyDays/ChessGPT#readme",
-  "dependencies": {
-    "openai": "^3.2.1",
+  "devDependencies": {
+    "webpack-cli": "^5.0.1",
     "ts-loader": "^9.4.2",
     "webpack": "^5.77.0"
-  },
-  "devDependencies": {
-    "webpack-cli": "^5.0.1"
   }
 }
