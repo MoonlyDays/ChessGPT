@@ -1,6 +1,6 @@
 import { Cell } from "./Cell";
 import { g_Globals } from "./Chess";
-import { ChessGPT } from "./ChessGPT";
+import { ChessGPT, EChatGPTRole } from "./ChessGPT";
 import { ETeam } from "./Constants";
 import { DOMEntity } from "./DOMEntity";
 import { Bishop } from "./Figures/Bishop";
@@ -60,8 +60,8 @@ export class Board extends DOMEntity
         this.CreateFigureAtAddress(Tower,   ETeam.Black, "A8");
         this.CreateFigureAtAddress(Knight,  ETeam.Black, "B8");
         this.CreateFigureAtAddress(Bishop,  ETeam.Black, "C8");
-        this.CreateFigureAtAddress(King,    ETeam.Black, "D8");
-        this.CreateFigureAtAddress(Queen,   ETeam.Black, "E8");
+        this.CreateFigureAtAddress(Queen,   ETeam.Black, "D8");
+        this.CreateFigureAtAddress(King,    ETeam.Black, "E8");
         this.CreateFigureAtAddress(Bishop,  ETeam.Black, "F8");
         this.CreateFigureAtAddress(Knight,  ETeam.Black, "G8");
         this.CreateFigureAtAddress(Tower,   ETeam.Black, "H8");
@@ -74,20 +74,27 @@ export class Board extends DOMEntity
         this.CreateFigureAtAddress(Tower,   ETeam.White, "A1");
         this.CreateFigureAtAddress(Knight,  ETeam.White, "B1");
         this.CreateFigureAtAddress(Bishop,  ETeam.White, "C1");
-        this.CreateFigureAtAddress(King,    ETeam.White, "D1");
-        this.CreateFigureAtAddress(Queen,   ETeam.White, "E1");
+        this.CreateFigureAtAddress(Queen,   ETeam.White, "D1");
+        this.CreateFigureAtAddress(King,    ETeam.White, "E1");
         this.CreateFigureAtAddress(Bishop,  ETeam.White, "F1");
         this.CreateFigureAtAddress(Knight,  ETeam.White, "G1");
         this.CreateFigureAtAddress(Tower,   ETeam.White, "H1");
 
         for(var i = 0; i < 8; i++)
             this.CreateFigureAtPosition(Pawn, ETeam.White, new Vector2(i, 6));
+
+        this.GPT.AddMessage(
+            EChatGPTRole.System, 
+            "Let's play chess. Tell me your moves in pairs of cell you move from and to. You "
+        );
     }
 
     ClearBoard()
     {
         for(var fig of this._Figures)
             fig.Destroy();
+
+        this.GPT.Reset();
     }
 
     GetCellByAddress(address: string): Cell
@@ -139,7 +146,7 @@ export class Board extends DOMEntity
     CanBotMove()    { return this.Turn == ETeam.Black; }
 
     SelectedFigure: Figure;
-    TrySelect(figure: Figure)
+    async TrySelect(figure: Figure)
     {
         if(!this.CanPlayerMove())
             return;
@@ -151,13 +158,100 @@ export class Board extends DOMEntity
         this.SelectedFigure = figure;
         this.SelectionBox.MoveTo(figure);
         figure.FindValidCellsToMove();
-
-        g_Globals.Game.Board.GPT.StartConversation();
     }
 
     ClearSelection()
     {
         this.SelectedFigure = null;
         g_Globals.Game.InvokeMethodOnEntitiesOfType(Cell, x => x.SetHighlightForSelection, false);
+    }
+
+    OnFigureMoved(figure: Figure, cellFrom: Cell, cellTo: Cell)
+    {
+        if(!(cellFrom && cellTo))
+            return;
+
+        // If player moved a figure, add this as a message
+        if(figure.IsOwnedByPlayer())
+        {
+            var capturedFigure = cellTo.Figure;
+
+            var msg = `I move ${ETeam[figure.Team]} ${figure.constructor.name} from ${cellFrom.Address} to ${cellTo.Address}.`;
+            if(capturedFigure) msg += ` (I captured your ${capturedFigure.constructor.name})`;
+            
+            // To send a message to chat, we need to know both old and new cell.
+            g_Globals.Game.Board.GPT.AddMessage(
+                EChatGPTRole.User,
+                msg
+            );
+        }
+
+        this.SwitchTurns();
+    }
+
+    public SwitchTurns()
+    {
+        var nextTurn = this.Turn == ETeam.Black
+            ? ETeam.White
+            : ETeam.Black;
+        
+        console.trace(`${ETeam[nextTurn]} turn!`);
+        this.Turn = nextTurn;
+
+        // Turn of the bot.
+        if(nextTurn == ETeam.Black)
+        {
+            this.QueryResponseFromChatGPT();
+        }
+    }
+
+    public async QueryResponseFromChatGPT()
+    {
+        var response = await this.GPT.GenerateCompletion();
+        var cells = response.match(/[A-Za-z][0-9]/g);
+        var fromAdr = cells[cells.length - 2].toUpperCase();
+        var toAdr = cells[cells.length - 1].toUpperCase();
+
+        var cellFrom = this.GetCellByAddress(fromAdr);
+        var cellTo = this.GetCellByAddress(toAdr);
+        
+        if(!(cellFrom && cellTo))
+        {
+            this.GPT.AddMessage(
+                EChatGPTRole.User,
+                "Can you tell me the pair of cells you moved from and to?"
+                );
+
+            return;
+        }
+
+        var figure = cellFrom.Figure;
+        if(!figure)
+        {
+            this.GPT.AddMessage(
+                EChatGPTRole.User,
+                "Can you tell me the pair of cells you moved from and to?"
+                );
+        }
+
+        if(figure.Team == ETeam.White)
+        {
+            
+        }
+
+        var availableCells = Array.from(figure.GenerateCellsToMove());
+        if(!availableCells.includes(cellTo))
+        {
+            this.GPT.AddMessage(
+                EChatGPTRole.User,
+                "Your last move is impossible"
+                );
+
+            this.QueryResponseFromChatGPT();
+            return;
+        }
+
+        figure.MoveToCell(cellTo);
+        console.log(`ChatGPT moved ${ETeam[figure.Team]} ${figure.constructor.name} from ${fromAdr} to ${toAdr}`);
     }
 }

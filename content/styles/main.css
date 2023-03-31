@@ -128,10 +128,10 @@ body {
   opacity: 0.5;
 }
 .field .cell.black {
-  background-color: #311;
+  background-color: #AAA;
 }
 .field .cell.white {
-  background-color: #FCC;
+  background-color: #BBB;
 }
 
 .figure {

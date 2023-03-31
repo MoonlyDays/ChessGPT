@@ -39,6 +39,9 @@ export class Figure extends DOMEntity
             this.Cell = null;
         }
 
+        this.OnMoved(oldCell, newCell);
+        g_Globals.Game.Board.OnFigureMoved(this, oldCell, newCell);
+
         if(cell)
         {
 
@@ -52,8 +55,6 @@ export class Figure extends DOMEntity
             this.DOMElement.style.left = `${100 / 8 * pos.X}%`
             this.DOMElement.style.top = `${100 / 8 * pos.Y}%`
         }
-
-        this.OnMoved(oldCell, newCell);
     }
 
     public OnMoved(fromCell: Cell, toCell: Cell)
