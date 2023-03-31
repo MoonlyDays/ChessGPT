@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <title>ChessGPT</title>
+        <link rel="stylesheet" href="./content/styles/main.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Alkatra:wght@400;700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class="viewport">
+            <div class="game">
+
+                <div class="board">
+                    <div class="board_col">
+                        <div class="grid_row">
+                            <div class="grid_label">A</div>
+                            <div class="grid_label">B</div>
+                            <div class="grid_label">C</div>
+                            <div class="grid_label">D</div>
+                            <div class="grid_label">E</div>
+                            <div class="grid_label">F</div>
+                            <div class="grid_label">G</div>
+                            <div class="grid_label">H</div>
+                        </div>
+                    </div>
+
+                    <div class="board_col">
+                        <div class="grid_col">
+                            <div class="grid_label">8</div>
+                            <div class="grid_label">7</div>
+                            <div class="grid_label">6</div>
+                            <div class="grid_label">5</div>
+                            <div class="grid_label">4</div>
+                            <div class="grid_label">3</div>
+                            <div class="grid_label">2</div>
+                            <div class="grid_label">1</div>
+                        </div>
+
+                        <div id="game_container"></div>
+
+                        <div class="grid_col">
+                            <div class="grid_label">8</div>
+                            <div class="grid_label">7</div>
+                            <div class="grid_label">6</div>
+                            <div class="grid_label">5</div>
+                            <div class="grid_label">4</div>
+                            <div class="grid_label">3</div>
+                            <div class="grid_label">2</div>
+                            <div class="grid_label">1</div>
+                        </div>
+                    </div>
+
+                    <div class="board_col">
+                        <div class="grid_row">
+                            <div class="grid_label">A</div>
+                            <div class="grid_label">B</div>
+                            <div class="grid_label">C</div>
+                            <div class="grid_label">D</div>
+                            <div class="grid_label">E</div>
+                            <div class="grid_label">F</div>
+                            <div class="grid_label">G</div>
+                            <div class="grid_label">H</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="chatlog">
+                    <div class="header">ChatGPT</div>
+                    <div class="messages">
+
+                        <div class="message player">
+                            <div class="avatar">
+                                <img src="https://avatars.cloudflare.steamstatic.com/61269e2108073315ae031cc517fcc5a86418b450_full.jpg" alt="" srcset="">
+                            </div>
+                            <div class="text">
+                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Consequatur rerum nostrum consequuntur quis perspiciatis inventore temporibus, et voluptatum molestias repudiandae quos reiciendis officia id? Nulla officiis in distinctio rem tenetur?
+                            </div>
+                        </div>
+
+                        <div class="message">
+                            <div class="avatar">
+                                <img src="https://gptapk.com/wp-content/uploads/2023/02/chatgpt-icon.png" alt="" srcset="">
+                            </div>
+                            <div class="text">
+                                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Consequatur rerum nostrum consequuntur quis perspiciatis inventore temporibus, et voluptatum molestias repudiandae quos reiciendis officia id? Nulla officiis in distinctio rem tenetur?
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script src="./content/scripts/chess.js"></script>
