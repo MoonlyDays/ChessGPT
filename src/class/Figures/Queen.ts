@@ -3,6 +3,18 @@ import { Figure } from "./Figure";
 
 export class Queen extends Figure
 {
+    constructor()
+    {
+        super();
+        this.Name = "Queen";
+    }
+
+    SetupDOMElement(el: HTMLElement): void 
+    {
+        super.SetupDOMElement(el);
+        el.classList.add("queen");
+    }
+
     public *GenerateCellsToMove()
     {
         // Forward move.

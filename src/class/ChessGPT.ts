@@ -1,19 +1,20 @@
-import { DOMEntity } from "./DOMEntity";
 import { List } from "./Util/List";
 
-const API_KEY = "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";
 const AVATAR_USER   = "https://avatars.cloudflare.steamstatic.com/61269e2108073315ae031cc517fcc5a86418b450_full.jpg";
 const AVATAR_BOT    = "https://gptapk.com/wp-content/uploads/2023/02/chatgpt-icon.png";
-const GPT_TEMPERATURE = 0.7;
+const AVATAR_SYSTEM = "https://files.softicons.com/download/application-icons/free-flat-icons-by-grafikartes/ico/systemPreferences.ico";
+const GPT_TEMPERATURE = 1;
 
 export class ChessGPT
 {
     private _MessageHistory = new List<ChatGPTMessage>();
     private _DOM: HTMLElement;
+    private _ApiInput: HTMLInputElement;
 
     constructor()
     {
         this._DOM = document.querySelector(".chatlog .messages");
+        this._ApiInput = document.querySelector("#gpt_api_key");
     }
 
     public Reset()
@@ -29,28 +30,36 @@ export class ChessGPT
         msg.Content = message;
         this._MessageHistory.Add(msg);
 
-        if(type == EChatGPTRole.System)
-            return;
-
         // Add element to 
         var domEl = document.createElement("div");
         domEl.classList.add("message");
+        var sAvatar = "";
 
-        if(type == EChatGPTRole.User)
-            domEl.classList.add("player");
-
-        var avatar = type == EChatGPTRole.User
-            ? AVATAR_USER
-            : AVATAR_BOT
+        switch(type)
+        {
+            case EChatGPTRole.Assistant:
+                sAvatar = AVATAR_BOT;
+                break;
+                
+            case EChatGPTRole.User:
+                sAvatar = AVATAR_USER;
+                domEl.classList.add("player");
+                break;
+            
+            case EChatGPTRole.System:
+                sAvatar = AVATAR_SYSTEM;
+                domEl.classList.add("system");
+                break;
+        }
 
         domEl.innerHTML = `
         <div class="avatar">
-            <img src="${avatar}" />
+            <img src="${sAvatar}" />
         </div>
         <div class="text">${message}</div>
         `;
 
-        this._DOM.append(domEl);
+        this._DOM.prepend(domEl);
     }
     
     public async GenerateCompletion(): Promise<string>
@@ -74,13 +83,20 @@ export class ChessGPT
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${API_KEY}`
+                "Authorization": `Bearer ${this._ApiInput.value}`
             },
             body: JSON.stringify(body)
         });
 
         // Get JSON
         var json = await res.json();
+        if(json.error)
+        {
+            alert(json.error.message);
+            console.error(json.error.message);
+            return "";
+        }
+
         var reply = json.choices[0].message.content;
         this.AddMessage(EChatGPTRole.Assistant, reply);
         return reply;

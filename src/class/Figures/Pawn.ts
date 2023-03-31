@@ -2,12 +2,23 @@ import { Cell } from "../Cell";
 import { g_Globals } from "../Chess";
 import { ETeam } from "../Constants";
 import { Tracer } from "../Tracer";
-import { Vector2 } from "../Util/Vector";
 import { Figure } from "./Figure";
 import { Queen } from "./Queen";
 
 export class Pawn extends Figure
 {
+    constructor()
+    {
+        super();
+        this.Name = "Pawn";
+    }
+
+    SetupDOMElement(el: HTMLElement): void 
+    {
+        super.SetupDOMElement(el);
+        el.classList.add("pawn");
+    }
+
     public *GenerateCellsToMove()
     {
         var maxFwdMoves = this.MoveTimes == 1 ? 2 : 1;

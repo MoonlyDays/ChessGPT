@@ -4,6 +4,18 @@ import { Figure } from "./Figure";
 
 export class Knight extends Figure
 {
+    constructor()
+    {
+        super();
+        this.Name = "Knight";
+    }
+
+    SetupDOMElement(el: HTMLElement): void 
+    {
+        super.SetupDOMElement(el);
+        el.classList.add("knight");
+    }
+
     public *GenerateCellsToMove()
     {
         for(var i = 0; i < 4; i++)
@@ -33,7 +45,7 @@ export class Knight extends Figure
 
     public *GetCellsFromCurvedTrace(trace: Tracer)
     {
-        if(trace.HasCollided)
+        if(trace.Error)
             return;
 
         var cell = trace.Cell;

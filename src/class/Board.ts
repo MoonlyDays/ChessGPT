@@ -14,6 +14,8 @@ import { SelectionBox } from "./SelectionBox";
 import { List } from "./Util/List";
 import { Vector2 } from "./Util/Vector";
 
+const MSG_INTRO = "Let's play chess. Tell me your moves in pairs of cell you move from and to. You play as Black.";
+
 export class Board extends DOMEntity
 {
     private _CellByAddress = new Map<string, Cell>();
@@ -85,7 +87,7 @@ export class Board extends DOMEntity
 
         this.GPT.AddMessage(
             EChatGPTRole.System, 
-            "Let's play chess. Tell me your moves in pairs of cell you move from and to. You "
+            MSG_INTRO
         );
     }
 
@@ -174,10 +176,11 @@ export class Board extends DOMEntity
         // If player moved a figure, add this as a message
         if(figure.IsOwnedByPlayer())
         {
+            this.SendBoardStateToChatGPT();
             var capturedFigure = cellTo.Figure;
 
-            var msg = `I move ${ETeam[figure.Team]} ${figure.constructor.name} from ${cellFrom.Address} to ${cellTo.Address}.`;
-            if(capturedFigure) msg += ` (I captured your ${capturedFigure.constructor.name})`;
+            var msg = `I move ${figure} from ${cellFrom.Address} to ${cellTo.Address}.`;
+            if(capturedFigure) msg += ` (I captured your ${capturedFigure} at ${cellTo.Address})`;
             
             // To send a message to chat, we need to know both old and new cell.
             g_Globals.Game.Board.GPT.AddMessage(
@@ -195,7 +198,7 @@ export class Board extends DOMEntity
             ? ETeam.White
             : ETeam.Black;
         
-        console.trace(`${ETeam[nextTurn]} turn!`);
+        console.log(`${ETeam[nextTurn]} turn!`);
         this.Turn = nextTurn;
 
         // Turn of the bot.
@@ -203,6 +206,14 @@ export class Board extends DOMEntity
         {
             this.QueryResponseFromChatGPT();
         }
+    }
+
+    public SendBoardStateToChatGPT()
+    {
+        var figs = <Figure[]>(g_Globals.Game.Entities.Filter(x => x instanceof Figure));
+        //figs = figs.filter(x => x.MoveTimes > 1);
+        var msg = `Current pieces on the board: ${figs.map(x => `${x} at ${x.Cell.Address}`).join(", ")}`;
+        this.GPT.AddMessage(EChatGPTRole.System, msg);
     }
 
     public async QueryResponseFromChatGPT()
@@ -219,9 +230,9 @@ export class Board extends DOMEntity
         {
             this.GPT.AddMessage(
                 EChatGPTRole.User,
-                "Can you tell me the pair of cells you moved from and to?"
-                );
+                "The cells you provided do not exist." );
 
+            this.QueryResponseFromChatGPT();
             return;
         }
 
@@ -230,13 +241,10 @@ export class Board extends DOMEntity
         {
             this.GPT.AddMessage(
                 EChatGPTRole.User,
-                "Can you tell me the pair of cells you moved from and to?"
-                );
-        }
-
-        if(figure.Team == ETeam.White)
-        {
-            
+                `There's no chess piece on ${fromAdr}.`);
+                
+            this.QueryResponseFromChatGPT();
+            return;
         }
 
         var availableCells = Array.from(figure.GenerateCellsToMove());
@@ -244,7 +252,7 @@ export class Board extends DOMEntity
         {
             this.GPT.AddMessage(
                 EChatGPTRole.User,
-                "Your last move is impossible"
+                "Your last move is impossible."
                 );
 
             this.QueryResponseFromChatGPT();
@@ -252,6 +260,6 @@ export class Board extends DOMEntity
         }
 
         figure.MoveToCell(cellTo);
-        console.log(`ChatGPT moved ${ETeam[figure.Team]} ${figure.constructor.name} from ${fromAdr} to ${toAdr}`);
+        console.log(`ChatGPT moved ${figure} from ${fromAdr} to ${toAdr}`);
     }
 }

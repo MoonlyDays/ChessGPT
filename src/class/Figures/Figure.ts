@@ -3,11 +3,13 @@ import { Cell } from "../Cell";
 import { g_Globals } from "../Chess";
 import { ETeam } from "../Constants";
 import { DOMEntity } from "../DOMEntity";
+import { Tracer } from "../Tracer";
 
 export class Figure extends DOMEntity
 {
     Team: ETeam = 0;
     Cell: Cell;
+    Name = "<undefined>";
     MoveTimes = 0;
 
     constructor()
@@ -24,7 +26,6 @@ export class Figure extends DOMEntity
     SetupDOMElement(el: HTMLElement): void
     {
         el.classList.add("figure");
-        el.classList.add(this.constructor.name.toLowerCase());
     }
 
     MoveToCell(cell: Cell)
@@ -32,6 +33,9 @@ export class Figure extends DOMEntity
         this.MoveTimes++;
         var oldCell = this.Cell;
         var newCell = cell;
+        
+        this.OnMoved(oldCell, newCell);
+        g_Globals.Game.Board.OnFigureMoved(this, oldCell, newCell);
 
         if(this.Cell)
         {
@@ -39,12 +43,8 @@ export class Figure extends DOMEntity
             this.Cell = null;
         }
 
-        this.OnMoved(oldCell, newCell);
-        g_Globals.Game.Board.OnFigureMoved(this, oldCell, newCell);
-
         if(cell)
         {
-
             this.Cell = cell;
             var contestedFigure = cell.Figure;
             contestedFigure?.Destroy();
@@ -80,6 +80,8 @@ export class Figure extends DOMEntity
         for(var cell of this.GenerateCellsToMove())
             cell.SetHighlightForSelection(true);
     }
+
+    toString() { return `${ETeam[this.Team]} ${this.Name}`; }
 }
 
 export enum EDistanceType

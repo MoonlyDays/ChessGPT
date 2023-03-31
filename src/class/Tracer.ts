@@ -6,16 +6,23 @@ import { Vector2 } from "./Util/Vector";
 
 export const MAX_CELLS = 8;
 
+export enum ETraceError
+{
+    None,
+    OutOfBounds,
+    Blocked
+}
+
 export class Tracer
 {
     public Cell: Cell;
-    public HasCollided = false;
+    public Error = ETraceError.None;
     public TracedCells = new List<Cell>()
     private _OriginalCell: Cell;
     private _UseCollisions = true;
     private _ContestEnemyCells = true;
     private _Team = ETeam.White;
-    private _TracedEnemy = false;
+    private _IsContestingEnemyCell = false;
 
     public static StartAt(cell: Cell, team: ETeam) : Tracer
     {
@@ -49,74 +56,97 @@ export class Tracer
 
     public Move(steps: Vector2) : Tracer
     {
-        if(this.HasCollided)
+        if(this.Error)
             return this;
 
+        // Steps is zero, we are done.
+        if(steps.Length == 0) 
+            return this;
+
+        // Get our current position.
         var myPos = this.Cell.Position;
+        // Calculate absolute direction we need to move.
         var dir = Vector2.Zero;
+        // Normalize each axis value so we get either -1 or 1.
         if(steps.X != 0) dir.X = steps.X / Math.abs(steps.X);
         if(steps.Y != 0) dir.Y = steps.Y / Math.abs(steps.Y);
-        if(dir.Length == 0) return this;
 
+        // Absolute direction is the direction we're 
+        // actually going to be tracing.
         var absDir = dir.Copy();
-        if(this._Team == ETeam.White) absDir.Y *= -1;
+        // White figures move the opposite direction from the 
+        // coordinate space.
+        if(this._Team == ETeam.White) 
+            absDir.Y *= -1;
 
+        // Calculate new position and finding cell on that position.
         var newPos = myPos.Add(absDir);
         var newCell = g_Globals.Game.Board.GetCellByPosition(newPos);
-        if(!this.CheckForCollision(newCell))
+
+        // See if we can trace to that cell.
+        this.Error = this.CanTraceToCell(newCell);
+        if(this.Error != ETraceError.None)
             return this;
 
+        // We can trace to that cell, add it to the trace list.
         this.TracedCells.Add(newCell);
+        // This is our current cell.
         this.Cell = newCell;
+        // Move further.
         return this.Move(steps.Subtract(dir));
     }
 
-    private CanTraceToCell(cell: Cell): boolean
+    private CanTraceToCell(cell: Cell): ETraceError
     {
         // No cell exists.
         if(!cell)
-            return false;
+            return ETraceError.OutOfBounds;
 
         // Collisions are disabled (knight)
         if(!this._UseCollisions)
-            return true;
+            return ETraceError.None;
 
         // All cell movements after we traced an enemy are not permitted.
-        if(this._TracedEnemy)
-            return false;
+        if(this._IsContestingEnemyCell)
+            return ETraceError.Blocked;
 
-        // Figure is already on this cell
+        // There is a figure on this cell.
         var figure = cell.Figure;
         if(figure)
         {
+            // If there is our teamate on this cell, we can't 
+            // go here under any circumstances.
             if(figure.Team == this._Team)
-                return false;
+            {
+                return ETraceError.Blocked;
+            }
 
-            if(!this._ContestEnemyCells)
-                return false;
-
-            this._TracedEnemy = true;
+            // If this trace can contest enemy cells
+            if(this._ContestEnemyCells)
+            {
+                // Mark that we are currently contesting an enemy cell
+                // We can't move after that.
+                this._IsContestingEnemyCell = true;
+            }
+            else
+            {
+                // We can't contest enemy cells, we are blocked by an enemy.
+                return ETraceError.Blocked;
+            }
         }
 
-        return true;
+        return ETraceError.None;
     }
 
     private CheckForCollision(cell: Cell)
     {
-        if(!this.CanTraceToCell(cell))
-        {
-            this.HasCollided = true;
-            return false;
-        }
-
-        return true;
     }
 
     public Reset(): Tracer
     {
         this.Cell = this._OriginalCell;
-        this._TracedEnemy = false;
-        this.HasCollided = false;
+        this.Error = ETraceError.None;
+        this._IsContestingEnemyCell = false;
         return this;
     }
 

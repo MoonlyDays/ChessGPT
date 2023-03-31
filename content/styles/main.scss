@@ -38,18 +38,52 @@ body {
             flex-shrink: 0;
         }
 
+        .messages_wrapper {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
         .messages {
             box-sizing: border-box;
-            height: 100%;
             overflow: auto;
+            display: flex;
+            flex-direction: column;
 
             .message {
                 padding: 20px;
                 display: flex;
 
+                animation-name: message_appear;
+                animation-duration: .2s;
+                animation-iteration-count: 1;
+    
+                @keyframes message_appear {
+                    from {
+                        padding: 0 20px;
+                        z-index: -1;
+                        opacity: 0;
+                    }
+                    to {
+                        padding: 20px;
+                        z-index: 0;
+                    }
+                }
+
                 &.player
                 {
                     background-color: #343541;
+                }
+
+                &.system
+                {
+                    background-color: #2d2e38;
+                    display: none;
+
+                    .text {
+                        font-size: 9px;
+                    }
                 }
 
                 .avatar {
@@ -218,4 +252,22 @@ body {
     &.visible {
         opacity: 1;
     }
+}
+
+.apikey {
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+input {
+    width: 100%;
+    background-color: #40414f;
+    border: none;
+    box-shadow: 0 0 15px rgba(0,0,0,.1);
+    border: 1px solid rgba(32,33,35,.5);
+    border-radius: 5px;
+    font-family: Montserrat, sans-serif;
+    color: white;
+    padding: 12px 20px;
+    outline: none;
 }
