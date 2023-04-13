@@ -1,5 +1,4 @@
 node_modules
-*.map
+*.js.map
 *.js
-*.css
 !webpack.config.js
