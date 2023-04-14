@@ -1,0 +1,248 @@
+body {
+  background: black;
+  padding: 0;
+  margin: 0;
+}
+
+.viewport {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  display: flex;
+}
+.viewport .game {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.viewport .chatlog {
+  width: 400px;
+  flex-shrink: 0;
+  height: 100%;
+  background-color: #444654;
+  font-family: Montserrat, sans-serif;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+.viewport .chatlog .header {
+  background-color: #202123;
+  padding: 20px 0;
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.viewport .chatlog .messages_wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.viewport .chatlog .messages {
+  box-sizing: border-box;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+.viewport .chatlog .messages .message {
+  padding: 20px;
+  display: flex;
+  animation-name: message_appear;
+  animation-duration: 0.2s;
+  animation-iteration-count: 1;
+}
+@keyframes message_appear {
+  from {
+    padding: 0 20px;
+    z-index: -1;
+    opacity: 0;
+  }
+  to {
+    padding: 20px;
+    z-index: 0;
+  }
+}
+.viewport .chatlog .messages .message.player {
+  background-color: #343541;
+}
+.viewport .chatlog .messages .message.system {
+  background-color: #2d2e38;
+  display: none;
+}
+.viewport .chatlog .messages .message.system .text {
+  font-size: 9px;
+}
+.viewport .chatlog .messages .message .avatar {
+  height: 40px;
+  width: 40px;
+  flex-shrink: 0;
+  margin-right: 15px;
+}
+.viewport .chatlog .messages .message .avatar img {
+  width: 100%;
+}
+.viewport .chatlog .messages .message .text {
+  color: #ECECEC;
+  font-size: 14px;
+}
+
+.board {
+  width: 900px;
+  height: 900px;
+}
+.board .grid_row {
+  height: 50px;
+  width: 800px;
+  padding: 0 50px;
+  display: flex;
+  background-color: #202020;
+}
+.board .grid_col {
+  height: 800px;
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  background-color: #202020;
+}
+
+.board_col {
+  display: flex;
+}
+
+.grid_label {
+  font-family: Alkatra;
+  font-weight: 700;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+  width: 100%;
+  height: 100%;
+}
+
+.field {
+  display: grid;
+  position: relative;
+  width: 800px;
+  height: 800px;
+  background-color: green;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+}
+.field .cell {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.field .cell::after {
+  content: "";
+  position: absolute;
+  background-color: green;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+.field .cell.highlight {
+  cursor: pointer;
+}
+.field .cell.highlight::after {
+  opacity: 0.5;
+}
+.field .cell.black {
+  background-color: #AAA;
+}
+.field .cell.white {
+  background-color: #BBB;
+}
+
+.figure {
+  width: 80px;
+  height: 80px;
+  background-color: white;
+  transform: translate(10px, 10px);
+  position: absolute;
+  transition: all 0.1s ease;
+  cursor: pointer;
+  pointer-events: none;
+  background-size: 0;
+  -webkit-mask-size: contain;
+          mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+}
+.figure.clickable {
+  pointer-events: all;
+}
+.figure.black {
+  filter: invert(100%);
+}
+.figure.pawn {
+  background-image: url(./../images/chess-pawn-icon.png);
+  -webkit-mask-image: url(../images/chess-pawn-icon.png);
+          mask-image: url(../images/chess-pawn-icon.png);
+}
+.figure.knight {
+  background-image: url(https://freesvg.org/img/Chess-Knight.png);
+  -webkit-mask-image: url(https://freesvg.org/img/Chess-Knight.png);
+          mask-image: url(https://freesvg.org/img/Chess-Knight.png);
+}
+.figure.tower {
+  background-image: url(https://img.freepik.com/free-icon/rook_318-887716.jpg?w=2000);
+  -webkit-mask-image: url(https://img.freepik.com/free-icon/rook_318-887716.jpg?w=2000);
+          mask-image: url(https://img.freepik.com/free-icon/rook_318-887716.jpg?w=2000);
+}
+.figure.bishop {
+  background-image: url(https://cdn-icons-png.flaticon.com/512/44/44903.png);
+  -webkit-mask-image: url(https://cdn-icons-png.flaticon.com/512/44/44903.png);
+          mask-image: url(https://cdn-icons-png.flaticon.com/512/44/44903.png);
+}
+.figure.king {
+  background-image: url(https://cdn-icons-png.flaticon.com/512/45/45124.png);
+  -webkit-mask-image: url(https://cdn-icons-png.flaticon.com/512/45/45124.png);
+          mask-image: url(https://cdn-icons-png.flaticon.com/512/45/45124.png);
+}
+.figure.queen {
+  background-image: url(https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-queen-icon.png);
+  -webkit-mask-image: url(https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-queen-icon.png);
+          mask-image: url(https://uxwing.com/wp-content/themes/uxwing/download/sport-and-awards/chess-queen-icon.png);
+}
+
+.selection_box {
+  width: 100px;
+  height: 100px;
+  box-sizing: border-box;
+  position: absolute;
+  border: 5px solid yellow;
+  opacity: 0;
+  transition: all 0.05s ease;
+}
+.selection_box.visible {
+  opacity: 1;
+}
+
+.apikey {
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+input {
+  width: 100%;
+  background-color: #40414f;
+  border: none;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(32, 33, 35, 0.5);
+  border-radius: 5px;
+  font-family: Montserrat, sans-serif;
+  color: white;
+  padding: 12px 20px;
+  outline: none;
+}/*# sourceMappingURL=main.css.map */
