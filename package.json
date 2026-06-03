@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/MoonlyDays/ChessGPT#readme",
   "devDependencies": {
-    "webpack-cli": "^5.0.1",
+    "webpack-cli": "^7.0.3",
     "ts-loader": "^9.4.2",
     "webpack": "^5.95.0"
   }
